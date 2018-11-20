@@ -24,8 +24,21 @@ public class MyServer extends JFrame {
 	private static Socket s;
 	private static BufferedReader br;
 	private static InputStreamReader isr;
-	private static String message = "";
-	
+	private static String message;
+	private static int heartRate;
+	private static double latitude;
+	private static double longitude;
+	private static char open;
+	private static char a;
+	private static char b;
+	private static char c;
+	private static int sat;
+	private static int pul;
+	private static int rat;
+	private static int HR;
+	private static String mark = "#";
+	private static String[] arrOfData;
+	private static int netID;
 	/**
 	 * Launch the application.
 	 */
@@ -57,6 +70,35 @@ public class MyServer extends JFrame {
 				br.close();
 				ss.close();
 				s.close();
+				
+				
+				arrOfData = message.split(mark, 4);
+				
+				netID = Integer.parseInt(arrOfData[0]);
+				latitude = Double.parseDouble(arrOfData[2]);
+				longitude = Double.parseDouble(arrOfData[3]);
+				
+				open = arrOfData[1].charAt(0);
+				if( open=='[' ) {
+					a = arrOfData[1].charAt(4);
+					b = arrOfData[1].charAt(5);
+					c = arrOfData[1].charAt(6);
+					
+					if( c==']' ) {
+						sat = Character.getNumericValue(b);
+						pul = Character.getNumericValue(a);
+						HR = pul*10 + sat;
+					} else {
+						sat = Character.getNumericValue(c);
+						pul = Character.getNumericValue(b);
+						rat = Character.getNumericValue(a);
+						HR = rat*100 + pul*10 + sat;
+					}
+				}
+				System.out.println( "Net ID : " + netID );
+				System.out.println( "Heart Rate : " + HR );
+				System.out.println( "Latitude : " + latitude );
+				System.out.println( "Longitude : " + longitude );
 			}
 			
 		} catch (IOException e) {
