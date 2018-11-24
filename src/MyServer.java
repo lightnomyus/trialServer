@@ -1,31 +1,41 @@
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
-public class MyServer extends JFrame {
+public class MyServer {
 
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	private JPanel contentPane;
 	
 	private static ServerSocket ss;
 	private static Socket s;
+	private static Socket s2;//send unique number to phone
 	private static BufferedReader br;
 	private static InputStreamReader isr;
-	private static String message;
-	private static int heartRate;
+	/*private static String message;
+	private static String phoneIP;
 	private static double latitude;
 	private static double longitude;
 	private static char open;
@@ -36,23 +46,20 @@ public class MyServer extends JFrame {
 	private static int pul;
 	private static int rat;
 	private static int HR;
-	private static String mark = "#";
 	private static String[] arrOfData;
-	private static int netID;
-	/**
-	 * Launch the application.
-	 */
+	private static int netID;*/
+	private static String mark = "#";
+	private static Date date;
+	
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
+	
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					MyServer frame = new MyServer();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		
+		int sat,pul,rat;
+		int HR = 0;
+		char open, a, b, c;
+		String[] arrOfData;
+		String message;
 		
 		try {
 			while(true) {
@@ -74,9 +81,9 @@ public class MyServer extends JFrame {
 				
 				arrOfData = message.split(mark, 4);
 				
-				netID = Integer.parseInt(arrOfData[0]);
-				latitude = Double.parseDouble(arrOfData[2]);
-				longitude = Double.parseDouble(arrOfData[3]);
+				double latitude = Double.parseDouble(arrOfData[2]);
+				double longitude = Double.parseDouble(arrOfData[3]);
+				String phoneIP = arrOfData[0];
 				
 				open = arrOfData[1].charAt(0);
 				if( open=='[' ) {
@@ -95,32 +102,45 @@ public class MyServer extends JFrame {
 						HR = rat*100 + pul*10 + sat;
 					}
 				}
-				System.out.println( "Net ID : " + netID );
+				
+				//get timestamp
+				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+				
+				System.out.println("Client Address : " + phoneIP);
 				System.out.println( "Heart Rate : " + HR );
 				System.out.println( "Latitude : " + latitude );
 				System.out.println( "Longitude : " + longitude );
+				System.out.println("Timestamp : " + sdf.format(timestamp));
+
+				
+				//export to csv file
+				FileOutputStream outFile = new FileOutputStream("victim.csv", true);
+				PrintWriter fileWrite = new PrintWriter(outFile);
+				
+				fileWrite.println(phoneIP + "," + HR + "," + latitude + "," + longitude + "," + sdf.format(timestamp));
+				fileWrite.close();
+				
 			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
-
-	/**
-	 * Create the frame.
-	 */
-	public MyServer() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
-		
-		JLabel textData = new JLabel("Received:");
-		contentPane.add(textData, BorderLayout.WEST);
-	}
-
+	/*public void sendButton(java.awt.event.ActionEvent evt) {
+		try {
+			s2 = new Socket(phoneIP, 5002);
+			PrintWriter pw = new PrintWriter(s2.getOutputStream());
+			pw.write(sendID);
+			pw.flush();
+			pw.close();
+			s2.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}*/
 }
